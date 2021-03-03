@@ -12,7 +12,7 @@ A: The official update_all tool does a lot of things really well and is essentia
  A: mra_sort_scan aims to reduce the artisnal clutter derived from the source MRA files where the same manufacturer may be tagged differently based on the license or other attributes. To avoid situiations where five different "Namco" manufacturer tags are used, mra_sort_scan uses a weak form of string matching to distil the list down to a single common value to be used as the defining parent manufacturer directory name. The current approach is far from perfect but can be simplified and possibly obsoleted as MRA manufacturer tags are standardized. 
 
  #### Q: How does the last 25 arcade MRA sorting work?
- A: currently mra_sort_scan sorts the _Arcade directory root by date and builds symlinks based on the last 25 MRA files added. The number 25 can be altered by passing a number switch to the -mr option.
+ A: currently mra_sort_scan sorts the _Arcade directory root by date and builds symlinks based on the last 25 MRA files added. The number 25 can be altered by passing a number switch to the -mr option. Future releases may enable support for recursive scanning to include alternatives and other mra sources.
 
  #### Q: What is this Sort-By-Platform directory structure?
  A: Sort-By-Platform is an attempt to address and bring light to the need for an arch or platform tag within the MRA file format. There are times where I would like to see what other titles exist for a common platform like the Sega System 1 architecture, or Capcom's CPS1. The architecture isn't always clear based on the core name chosen by the developer which is often a core based on an individual title.
