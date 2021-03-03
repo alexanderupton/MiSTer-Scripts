@@ -4,7 +4,7 @@
 ![image](https://user-images.githubusercontent.com/45669411/109841961-96bd1c00-7c17-11eb-8c90-70a486edb3a0.png)
 
 #### Q: How to install mra_sort_scan ?<br>
-Copy
+<pre>wget --no-check-certificate https://github.com/alexanderupton/MiSTer-Scripts/releases/download/v0.01/mra_sort_scan.sh -P /media/fat/Scripts/</pre>
 
 #### Q: why write mra_sort_scan ?<br>
 A: The official update_all tool does a lot of things really well and is essential to the MiSTer experience, but I wanted to explore a different approach that was both I/O and storage conscious. All sorting is accomplished by reading each source MRA file and creating a Symlink to the source MRA file from the corasponding sort by directory. This aproach reduces the overall storage consumption and disk I/O by not copying the same MRA file to each contextually sorted directory, which may also prevent the early demise of an SD storage device which has a definitive number of write cycles. <br>
