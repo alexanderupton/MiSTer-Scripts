@@ -1,6 +1,7 @@
 # MiSTer-Scripts
 Scripts for MiSTer FPGA users
 
+<pre>
 mra_sort_scan <option> <switch>
 options:
    -bc : Create Sort-By-Core Directory Structure
@@ -14,3 +15,4 @@ switches:
 
 example:
      ./mra_sort_scan -mr 35
+</pre>
