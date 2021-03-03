@@ -39,6 +39,7 @@ fi
 # ========= OPTIONS ==================
 
 MRA_PATH="/media/fat/_Arcade"
+MRA_RECENT_DIR=${MRA_PATH}/"_.Most Recent"
 UPDATE_ALL_LOG="/media/fat/Scripts/.mister_updater/update_all.log"
 VER="0.01"
 
@@ -51,10 +52,14 @@ USAGE(){
  echo "   -bc : Create Sort-By-Core Directory Structure"
  echo "   -bm : Create Sort-By-Manufacturer Directory Structure"
  echo "   -by : Create Sort-By-Year Directory Structure"
- echo "   -mr : Create Most Recent Updates Directory Structure"
+ echo "   -mr : Create Last 25 Arcade MRA Updates Directory Structure"
+ echo "       : Passing a number overides the default 25"
  echo 
  echo "switches:"
  echo "     -v : verbose output"
+ echo
+ echo "example:"
+ echo "     ./mra_sort_scan -mr 35"
  echo
 }
 
@@ -131,14 +136,14 @@ for MRA in $(find ${MRA_PATH} -type f -name "*.mra"); do
     esac
   fi
 
+  echo "Processing: ${MRA_REAL} - Manufacturer: ${CORE_DIR}"
   if [ -n "${CORE_DIR}" ]; then
-    echo "Processing: ${MRA_REAL} - Manufacturer: ${CORE_DIR}"
     [[ ! -d ${MRA_PATH}/"_.By Manufacturer"/"_${CORE_DIR}" ]] && mkdir ${MKDIR_OPT} ${MRA_PATH}/"_.By Manufacturer"/"_${CORE_DIR}" 
     if [ ! -L ${MRA_PATH}/"_.By Manufacturer"/"_${CORE_DIR}"/${MRA_NAME} ]; then
       ln ${LN_OPT} ${MRA} ${MRA_PATH}/"_.By Manufacturer"/"_${CORE_DIR}"/${MRA_NAME}
     fi
   else
-    [[ ${SWITCH} == "-v" ]] && "Malformed MRA : ${MRA} - CORE:${CORE_NAME} - CORE_DIR: ${CORE_DIR} - MANUFACTUER: ${MFG_NAME}"
+    [[ ${SWITCH} == "-v" ]] && echo "Malformed MRA : ${MRA} - CORE:${CORE_NAME} - CORE_DIR: ${CORE_DIR} - MANUFACTUER: ${MFG_NAME}"
   fi
 
   unset CORE_NAME CORE_DIR MFG_NAME
@@ -154,14 +159,14 @@ for MRA in $(find ${MRA_PATH} -type f -name "*.mra"); do
   CORE_NAME=$(sed -ne '/rbf/{s/.*<rbf>\(.*\)<\/rbf>.*/\1/p;q;}' ${MRA} | awk -F\( {'print $1'})
   CORE_DIR=${CORE_NAME}
 
+  echo "Processing: ${MRA_REAL} - Core: ${CORE_NAME}"
   if [ -n "${CORE_DIR}" ]; then
-    echo "Processing: ${MRA_REAL} - Core: ${CORE_NAME}"
     [[ ! -d ${MRA_PATH}/"_.By Core"/"_${CORE_DIR}" ]] && mkdir ${MKDIR_OPT} ${MRA_PATH}/"_.By Core"/"_${CORE_DIR}"
     if [ ! -L ${MRA_PATH}/"_.By Core"/"_${CORE_DIR}"/${MRA_NAME} ]; then
       ln ${LN_OPT} ${MRA} ${MRA_PATH}/"_.By Core"/"_${CORE_DIR}"/${MRA_NAME}
     fi
   else
-    [[ ${SWITCH} == "-v" ]] && "Malformed MRA : ${MRA} - CORE:${CORE_NAME} - CORE_DIR: ${CORE_DIR} - MANUFACTUER: ${MFG_NAME}"
+    [[ ${SWITCH} == "-v" ]] && echo "Malformed MRA : ${MRA} - CORE:${CORE_NAME} - CORE_DIR: ${CORE_DIR} - MANUFACTUER: ${MFG_NAME}"
   fi
 
   unset CORE_NAME CORE_DIR MFG_NAME
@@ -178,9 +183,9 @@ for MRA in $(find ${MRA_PATH} -type f -name "*.mra"); do
   CORE_DIR=${CORE_YEAR}
   CORE_YEAR_RE='^[0-9]+$'
 
+  echo "Processing: ${MRA_REAL} - Year: ${CORE_YEAR}"
   if [[ ${CORE_YEAR} =~ ${CORE_YEAR_RE} ]]; then
     if [ -n "${CORE_DIR}" ]; then
-      echo "Processing: ${MRA_REAL} - Year: ${CORE_YEAR}"
       [[ ! -d ${MRA_PATH}/"_.By Year"/"_${CORE_DIR}" ]] && mkdir ${MKDIR_OPT} ${MRA_PATH}/"_.By Year"/"_${CORE_DIR}"
       if [ ! -L ${MRA_PATH}/"_.By Year"/"_${CORE_DIR}"/${MRA_NAME} ]; then
         ln ${LN_OPT} ${MRA} ${MRA_PATH}/"_.By Year"/"_${CORE_DIR}"/${MRA_NAME}
@@ -198,59 +203,73 @@ done
 
 }
 
-MOST_RECENT(){
-MRA_RECENT_DIR=${MRA_PATH}/"_.Most Recent"
+MOST_RECENT() {
 [[ ! -d "${MRA_RECENT_DIR}" ]] && mkdir ${MKDIR_OPT} "${MRA_RECENT_DIR}"
 
-  UPDATE_SCAN(){
-    for UPDATE in $(grep mra ${UPDATE_ALL_LOG}); do
+SWITCH_RE='^[0-9]+$'
 
-      for MRA_NAME in $(echo $UPDATE | sed 's/, /\n/g'); do
-        if [ -n "${MRA_NAME}" ]; then
-          if [[ "${MRA_NAME}" == *.mra ]]; then
-            export NEW_MRA="true"
-            export NEW_MRA_LIST="${NEW_MRA_LIST} ${MRA_NAME}"
+[[ ${SWITCH} =~ ${SWITCH_RE} ]] && MRA_RECENT_LEN=${SWITCH} || MRA_RECENT_LEN="25"
 
-            if [ -f "${MRA_PATH}/${MRA_NAME}" ]; then
-              MRA="${MRA_PATH}/${MRA_NAME}"
+LAST_25_MRA=$(ls -tr ${MRA_PATH}/*.mra | tail -${MRA_RECENT_LEN})
 
-              if [ ! -L "${MRA_RECENT_DIR}/${MRA_NAME}" ]; then
-                MFG_NAME=$(sed -ne '/manufacturer/{s/.*<manufacturer>\(.*\)<\/manufacturer>.*/\1/p;q;}' ${MRA} | awk -F\( {'print $1'})
-                CORE_NAME=$(sed -ne '/rbf/{s/.*<rbf>\(.*\)<\/rbf>.*/\1/p;q;}' ${MRA} | awk -F\( {'print $1'})
-      	        echo "Processing: ${MRA_NAME} - Manufacturer: ${MFG_NAME} - Core: ${CORE_NAME}"
-	        ln ${LN_OPT} ${MRA} "${MRA_RECENT_DIR}/${MRA_NAME}"
-              fi
+for MRA in ${LAST_25_MRA}; do
+  LAST_25_MRA_LIST="${LAST_25_MRA_LIST} ${MRA}"
+  if [ -f "${MRA}" ]; then
+    MRA_NAME=$(basename ${MRA})
+    MFG_NAME=$(sed -ne '/manufacturer/{s/.*<manufacturer>\(.*\)<\/manufacturer>.*/\1/p;q;}' ${MRA} | awk -F\( {'print $1'})
+    CORE_NAME=$(sed -ne '/rbf/{s/.*<rbf>\(.*\)<\/rbf>.*/\1/p;q;}' ${MRA} | awk -F\( {'print $1'})
+    echo "Processing: ${MRA_NAME} - Manufacturer: ${MFG_NAME} - Core: ${CORE_NAME}"
 
-            fi
-          fi
-        else
-          echo "There have been no new MRA changes since the last update."  
-        fi
-        unset MRA_NAME MRA MFG_NAME CORE_NAME 
+    if [ ! -L "${MRA_RECENT_DIR}/${MRA_NAME}" ]; then
+      ln ${LN_OPT} ${MRA} "${MRA_RECENT_DIR}/${MRA_NAME}"
+    fi
 
-      done 
-    done
-
-    if [ "${NEW_MRA}" == "true" ]; then
-      for CURRENT_MRA in ${MRA_RECENT_DIR}/*.mra; do
-        MRA_NAME=$(basename ${CURRENT_MRA})
-  
-        if ! echo ${NEW_MRA_LIST} | grep -q ${MRA_NAME}; then
-          rm -f "${MRA_NAME}"
-        fi
-
-      done
-
-     fi
-  }
-
-  if grep -q mra ${UPDATE_ALL_LOG}; then
-    UPDATE_SCAN
-  else
-    echo 
-    echo "  There have been no new MRA changes since the last update."
-    echo
   fi
+  unset MRA MRA_NAME MFG_NAME CORE_NAME
+done
+
+for MRA in ${MRA_RECENT_DIR}/*; do
+  MRA_NAME=$(basename ${MRA})
+  if ! echo ${LAST_25_MRA_LIST} | grep -q ${MRA_NAME}; then
+    rm -fv ${MRA} | logger -t mra_sort_scan
+  fi
+done
+
+}
+
+SORT_BY_PLATFORM() {
+
+for MRA in $(find ${MRA_PATH} -type f -name "*.mra"); do
+  MRA_NAME=$(basename "${MRA}")
+  MRA_REAL=$(basename "${MRA}" | awk -F. {'print $1'})
+  MFG_NAME=$(sed -ne '/manufacturer/{s/.*<manufacturer>\(.*\)<\/manufacturer>.*/\1/p;q;}' ${MRA} | awk -F\( {'print $1'})
+  CORE_NAME=$(sed -ne '/rbf/{s/.*<rbf>\(.*\)<\/rbf>.*/\1/p;q;}' ${MRA} | awk -F\( {'print $1'})
+
+  case ${CORE_NAME} in
+    segasys1*|SEGASYS1*) CORE_DIR="Sega System 1" ;;
+    segasys2*|SEGASYS2*) CORE_DIR="Sega System 2" ;;
+    segasyse*|SEGASYSE*) CORE_DIR="Sega System E" ;;
+    segasys16*|SEGASYSE*) CORE_DIR="Sega System 16" ;;
+    segasys18*|SEGASYSE*) CORE_DIR="Sega System 18" ;;
+    jtcps1) CORE_DIR="Capcom CPS1" ;;
+    jtcps15) CORE_DIR="Capcom CPS1.5" ;;
+    jtcps2) CORE_DIR="Capcom CPS2" ;;
+    jtcps3) CORE_DIR="Capcom CPS3" ;;
+    iremm62) CORE_DIR="Irem M62" ;;
+  esac
+
+  echo "Processing: ${MRA_REAL} - Core: ${CORE_DIR}"
+  if [ -n "${CORE_DIR}" ]; then
+    [[ ! -d ${MRA_PATH}/"_.By Platform"/"_${CORE_DIR}" ]] && mkdir ${MKDIR_OPT} ${MRA_PATH}/"_.By Platform"/"_${CORE_DIR}"
+    if [ ! -L ${MRA_PATH}/"_.By Platform"/"_${CORE_DIR}"/${MRA_NAME} ]; then
+      ln ${LN_OPT} ${MRA} ${MRA_PATH}/"_.By Platform"/"_${CORE_DIR}"/${MRA_NAME}
+    fi
+  else
+    [[ ${SWITCH} == "-v" ]] && echo "Malformed MRA : ${MRA} - CORE:${CORE_NAME} - CORE_DIR: ${CORE_DIR} - MANUFACTUER: ${MFG_NAME}"
+  fi
+
+  unset CORE_NAME CORE_DIR MFG_NAME
+done
 
 }
 
@@ -259,6 +278,8 @@ case ${OPTION} in
  -bm) SORT_BY_MFG ;;
  -bc) SORT_BY_CORE ;;
  -by) SORT_BY_YEAR ;;
+ -bp) SORT_BY_PLATFORM ;;
  -mr) MOST_RECENT ;;
+
  *) USAGE ;;
 esac
