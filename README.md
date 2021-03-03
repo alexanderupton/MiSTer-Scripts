@@ -21,7 +21,7 @@ A: The official update_all tool does a lot of things really well and is essentia
  A: Whenever you want to update your Sort-By directory structure to reflect recent changes.
  
  #### Q: When does mra_sort_scan get updates?
- A: That depends on community interest and the rate which new core and MRA updates are released.
+ A: That depends on community interest and the rate which new core and MRA updates that bring structural changes are released.
  
 <pre>
 mra_sort_scan <option> <switch>
