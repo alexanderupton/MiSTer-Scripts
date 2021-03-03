@@ -15,7 +15,7 @@ A: The official update_all tool does a lot of things really well and is essentia
  A: currently mra_sort_scan sorts the _Arcade directory root by date and builds symlinks based on the last 25 MRA files added. The number 25 can be altered by passing a number switch to the -mr option. Future releases may enable support for recursive scanning to include alternatives and other mra sources.
 
  #### Q: What is this Sort-By-Platform directory structure?
- A: Sort-By-Platform is an attempt to address and bring light to the need for an arch or platform tag within the MRA file format. There are times where I would like to see what other titles exist for a common platform like the Sega System 1 architecture, or Capcom's CPS1. The architecture isn't always clear based on the core name chosen by the developer which is often a core based on an individual title.
+ A: Sort-By-Platform is an attempt to address and bring light to the need for an arch or platform tag within the MRA file format. There are times where I would like to see what other titles exist for a common platform like the Sega System 1 architecture, or Capcom's CPS1. The architecture isn't always clear based on the core name chosen by the developer which is often a core based on an individual title. The current platform association scan is weak and limited by static values and will be enriched as more platform to title associations become clear, or a <-platform-> tag is added to the MRA file format.
  
  #### Q: When should mra_sort_scan be run?
  A: Whenever you want to update your Sort-By directory structure to reflect recent changes.
