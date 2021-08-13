@@ -1,5 +1,6 @@
 #!/bin/bash
 # mra_sort_scan : v0.01 : Alexander Upton : 02/26/2021
+# mra_sort_scan : v0.02 : Alexander Upton : 08/13/2021
 
 # Copyright (c) 2021 Alexander Upton <alex.upton@gmail.com>
 # This program is free software: you can redistribute it and/or modify
@@ -19,6 +20,7 @@
 # https://github.com/alexanderupton/MiSTer-Scripts
 
 # v0.01 : Alexander Upton : 02/26/2021 : Initial Release
+# v0.02 : Alexander Upton : 08/13/2021 : Switching from grep to fgrep
 
 
 # ========= IMMUTABLE ================
@@ -230,7 +232,7 @@ done
 
 for MRA in ${MRA_RECENT_DIR}/*; do
   MRA_NAME=$(basename ${MRA})
-  if ! echo ${LAST_25_MRA_LIST} | grep -q ${MRA_NAME}; then
+  if ! echo ${LAST_25_MRA_LIST} | fgrep -q ${MRA_NAME}; then
     rm -fv ${MRA} | logger -t mra_sort_scan
   fi
 done
